@@ -13,4 +13,4 @@
 * С помощью этого скрипта можно получить данные по Exteisions и их GUIDs из иситемы Avaya IP Office
 
 ## Avaya_read_usersData_fromAPIandWEB_Pythin2.7.py
-+ С помощью этого скрипта можно получить данные по Users и их GUIDs из сиситемы Avaya IP Office
+* С помощью этого скрипта можно получить данные по Users и их GUIDs из сиситемы Avaya IP Office
