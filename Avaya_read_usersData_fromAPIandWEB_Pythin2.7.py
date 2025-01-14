@@ -14,6 +14,16 @@ sys.setdefaultencoding('utf8')
   # _______________________________
 
 
+
+"""
+  Сделать
+  -----------------
+    п.4 в опивании
+    
+"""
+
+
+
 """
   Описание скрипта
   -----------------
@@ -35,7 +45,7 @@ sys.setdefaultencoding('utf8')
       3.2 при активации "# чтение данных из файла 'Avaya_readUsersData_response.content.data'"  данные, ранее полученные с API IPO м записанные в файл, 
                  читаются из этого файла. 
                  Т.е. в данном случае чтение данных API и из запись в файл надо отключить
-    4. есть раздел "# чтение данных из файла usersFromWEB.xml для получения дополнительных данных (о forwrad & twinning)"
+    4. (НЕ РАБОТАЕТ. Разобраться.) есть раздел "# чтение данных из файла Avaya_usersFromWEB.xml для получения дополнительных данных (о forward & twinning)"
               Дело в том, что при API bp IPO загружаются не все данные по Users. 
               Дополнительные нужные данные можно получить из .xml файла, полученного при Tools -> Export -> User (данное есть и в IPOmanager, и в WEB IPOmanager)
 
@@ -211,8 +221,8 @@ try:
 
   #     # сохранения данных в файл 'Avaya_userData_response.content.data'
   # file = open(r'.\Avaya_userData_response.content.data', 'w')
-  # print "file Avaya_userData_response.content.data is writiung"
-  # logger.info("file Avaya_userData_response.content.data is writiung")
+  # print "file Avaya_userData_response.content.data is writing"
+  # logger.info("file Avaya_userData_response.content.data is writing")
   # try:
   #   file.write(response_usersData.content)
   #   print "file Avaya_userData_response.content.data wrote"
@@ -250,7 +260,7 @@ try:
 
 
 
-    # чтение данных из файла usersFromWEB.xml для получения дополнительных данных (о forwrad & twinning)
+    # чтение данных из файла Avaya_usersFromWEB.xml для получения дополнительных данных (о forward & twinning)
   file = open(r'.\Avaya_usersFromWEB.xml', 'r')
   logger.info("-----------------------read data from file  Avaya_usersFromWEB.xml")
   print "read data from file   Avaya_usersFromWEB.xml"
