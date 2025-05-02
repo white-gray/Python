@@ -4,6 +4,7 @@ import base64
 import sys
 import requests
 import logging
+from logging.handlers import RotatingFileHandler
 import collections
 
 
@@ -59,6 +60,64 @@ sys.setdefaultencoding('utf8')
 
 _____________________________________________________________________________________________________________________________________________________"""
 
+
+
+
+
+"""
+  настойки систем
+_____________________________________________________________________________________________________________________________________________________"""
+
+ #################
+ # IPO Settings
+ #################
+ 
+server = IPaddress сервера IPO (в кавычках)
+username = имя пользователя IPO (в кавычках)
+password = пароль IPO (в кавычках) 
+authStr = username+":"+password
+authBytesStrEncoded = str(base64.b64encode(bytes(authStr)))
+
+
+ #################
+ # set loggimg
+ #################
+
+ # Logging initializing
+log_file = './Avaya_extensions_searchEmptyPool.log'
+ #logging.basicConfig()
+logger = logging.getLogger("Avaya_extensions_searchEmptyPool")
+logger.setLevel(logging.DEBUG)
+# Set logging level @ params
+maxBytes = 300000  # когда размер текущего лог-файла достигнет размера,  следующие записи будут попадать в другие файлы
+backupCount = 1  # сколько всего будет сохраняться старых файлов логов (старые будут стираться) (+ рабочий файл)
+handler = RotatingFileHandler(log_file, maxBytes=maxBytes, backupCount=backupCount, mode='a', encoding=None, delay=0)
+# handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s line %(lineno)d:   %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+ ##########################
+ # используемые в программе
+ ##########################
+
+headersAuth = {"X-User-Client": "Avaya-WebAdmin",
+            "X-User-Agent": "Avaya-SDKUser",
+            "Content-Type": "application/json",
+            "Authorization": "Basic " + authBytesStrEncoded}
+headers = {"X-User-Client": "Avaya-WebAdmin",
+            "X-User-Agent": "Avaya-SDKUser",
+            "Content-Type": "application/json"}
+
+
+dictExtensionsFromAvaya = {}  # - dict, полученный от API Avaya IPO
+dataFromAvayaExtensions = {}  # - dict номеров
+
+
+"""
+  КОНЕЦ
+    настойки систем
+_____________________________________________________________________________________________________________________________________________________"""
 
 
 
@@ -147,58 +206,6 @@ def chackItIsDigit(answer):
 _____________________________________________________________________________________________________________________________________________________"""
 
 
-
-
-"""
-  настойки систем
-_____________________________________________________________________________________________________________________________________________________"""
-
- # IPO Settings
-server = "IPaddress сервера IPO"
-username = "логин аккаунта SDK"
-password = "пароль аккаунта SDK"
-
-authStr = username+":"+password
-authBytesStrEncoded = str(base64.b64encode(bytes(authStr)))
-
-
- #################
- # set loggimg
- #################
-
- # Logging initializing
-log_file = './Avaya_extensions_searchEmptyPool.log'
- #logging.basicConfig()
-logger = logging.getLogger("importldap")
- #Set logging level
-logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(log_file, encoding='utf-8')  # , encoding='utf-8' - это уже я прописал, и стало часто выдавать ошибку в жтом месте
-# handler = logging.FileHandler(log_file)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
- ##########################
- # используемые в программе
- ##########################
-
-headersAuth = {"X-User-Client": "Avaya-WebAdmin",
-            "X-User-Agent": "Avaya-SDKUser",
-            "Content-Type": "application/json",
-            "Authorization": "Basic " + authBytesStrEncoded}
-headers = {"X-User-Client": "Avaya-WebAdmin",
-            "X-User-Agent": "Avaya-SDKUser",
-            "Content-Type": "application/json"}
-
-
-dictExtensionsFromAvaya = {}  # - dict, полученный от API Avaya IPO
-dataFromAvayaExtensions = {}  # - dict номеров
-
-
-"""
-  КОНЕЦ
-    настойки систем
-_____________________________________________________________________________________________________________________________________________________"""
 
 
 

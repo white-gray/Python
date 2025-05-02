@@ -4,6 +4,7 @@ import base64
 import sys
 import requests
 import logging
+from logging.handlers import RotatingFileHandler
 
 
   # определение кодировки
@@ -16,27 +17,81 @@ sys.setdefaultencoding('utf8')
   -----------------
 
 
-С помощью этого скрипта можно получить данные по Exteisions и их GUIDs из иситемы Avaya IP Office
+С помощью этого скрипта можно получить данные по Exteisions и их GUIDs из системы Avaya IP Office
 
   Возможны варианты исполнения:
     1. в разделе "настойки систем -> # IPO Settings " прописываются IPaddress сервера и логин, пароль API доступа на него
     2. есть раздел "### ----------> чтение данных с API IPO"
                 при его активации, данные читаются с API IPO
-    3. есть раздел "### ----------> работа с файлом, чтобы не постоянно читать данные с сисьемы IPO" в который входят подразделы 
+    3. есть раздел "### ----------> работа с файлом, чтобы не постоянно читать данные с системы IPO" в который входят подразделы 
             "# сохранения данных в файл Avaya_extensionsData_response'"
               и
             "# чтение данных из файла Avaya_extensionsData_response.content.data'
       
       3.1 при активации "# сохранения данных в файл Avaya_extensionsData_response'" данные, прочитанные в API IPO сохраняются в файл.
-                 В дальнейшем можно использовать их при праверках, чтобы "не дергать" системы
+                 В дальнейшем можно использовать их при проверках, чтобы "не дергать" системы
       3.2 при активации "# чтение данных из файла Avaya_extensionsData_response.content.data'"  данные, ранее полученные с API IPO м записанные в файл, 
                  читаются из этого файла. 
                  Т.е. в данном случае чтение данных API и из запись в файл надо отключить
 
 
-Работает с любого компа где установлен Python 2.7
 
 _____________________________________________________________________________________________________________________________________________________"""
+
+
+
+
+
+
+
+"""
+  настойки систем
+_____________________________________________________________________________________________________________________________________________________"""
+
+ # IPO Settings
+server = IPaddress сервера IPO (в кавычках)
+username = имя пользователя IPO (в кавычках)
+password = пароль IPO (в кавычках) 
+authStr = username+":"+password
+authBytesStrEncoded = str(base64.b64encode(bytes(authStr)))
+
+
+  # Logging initializing
+log_file = './Avaya_read_extensionsData.log'
+  #logging.basicConfig()
+logger = logging.getLogger("Avaya_read_extensionsData")
+logger.setLevel(logging.DEBUG)
+  # Set logging level @ params
+maxBytes = 300000  # когда размер текущего лог-файла достигнет размера,  следующие записи будут попадать в другие файлы
+backupCount = 1  # сколько всего будет сохраняться старых файлов логов (старые будут стираться) (+ рабочий файл)
+handler = RotatingFileHandler(log_file, maxBytes=maxBytes, backupCount=backupCount, mode='a', encoding=None, delay=0)
+# handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s line %(lineno)d:   %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
+ # используемые в программе
+
+headersAuth = {"X-User-Client": "Avaya-WebAdmin",
+            "X-User-Agent": "Avaya-SDKUser",
+            "Content-Type": "application/json",
+            "Authorization": "Basic " + authBytesStrEncoded}
+headers = {"X-User-Client": "Avaya-WebAdmin",
+            "X-User-Agent": "Avaya-SDKUser",
+            "Content-Type": "application/json"}
+
+
+dictExtensionsFromAvaya = {}
+dataFromAvayaExtensions = {}
+
+
+"""
+  КОНЕЦ
+    настойки систем
+_____________________________________________________________________________________________________________________________________________________"""
+
+
 
 
 
@@ -93,57 +148,6 @@ def sessionGet(APIfunction):
   КОНЕЦ 
     здесь собраны все DEFs
 _____________________________________________________________________________________________________________________________________________________"""
-
-
-
-
-"""
-  настойки систем
-_____________________________________________________________________________________________________________________________________________________"""
-
- # IPO Settings
-server = "IPaddress сервера IPO"
-username = "логин аккаунта SDK"
-password = "пароль аккаунта SDK"
-
-authStr = username+":"+password
-authBytesStrEncoded = str(base64.b64encode(bytes(authStr)))
-
-
- # Logging initializing
-log_file = './Avaya_read_extensionsData.log'
- #logging.basicConfig()
-logger = logging.getLogger("importldap")
- #Set logging level
-logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(log_file, encoding='utf-8')  # , encoding='utf-8' - это уже я прописал, и стало часто выдавать ошибку в жтом месте
-# handler = logging.FileHandler(log_file)
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-
- # используемые в программе
-
-headersAuth = {"X-User-Client": "Avaya-WebAdmin",
-            "X-User-Agent": "Avaya-SDKUser",
-            "Content-Type": "application/json",
-            "Authorization": "Basic " + authBytesStrEncoded}
-headers = {"X-User-Client": "Avaya-WebAdmin",
-            "X-User-Agent": "Avaya-SDKUser",
-            "Content-Type": "application/json"}
-
-
-dictExtensionsFromAvaya = {}
-dataFromAvayaExtensions = {}
-
-
-"""
-  КОНЕЦ
-    настойки систем
-_____________________________________________________________________________________________________________________________________________________"""
-
-
 
 
 
