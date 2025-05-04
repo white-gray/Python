@@ -297,12 +297,7 @@ def thisCancelOrTechDismissal(accountImoprtantInfo):
 
   # чтение данных по сотруднику в  Active Directory
 def toLDAP_search (ldaproot, ldapfilter, findingUserPrincipalName, attributes):
-  # LDAPConn.search(ldaproot, ldapfilter, attributes=attributes)  # было изначально  # мои изменения
-  # result = LDAPConn.search(ldaproot, ldapfilter, attributes=attributes)  # мои изменения - выбор пользователя по его  cn
-  # print result
   LDAPConn.search(ldaproot, ldapfilter % findingUserPrincipalName, attributes=attributes)
-  # print "LDAPConn.entries = ",LDAPConn.entries
-  # print "LDAPConn.search = ", LDAPConn.search(ldaproot,'(givenName=i.ivanovskaya)')
   return LDAPConn.entries
 
 
@@ -328,8 +323,6 @@ def printDataFromNaumenCC(issueNumber, results, response, thisIsSecondAccaunt_m)
   results[issueNumber][6] += thisIsSecondAccaunt_m + printVariableWithCheckIt(thisIsSecondAccaunt_m, "Домашний телефон", response, "homePhoneNumber", " FMTN ")
   results[issueNumber][6] += printVariableWithCheckIt(thisIsSecondAccaunt_m, "Рабочий телефон", response, "workPhoneNumber", "")
   results[issueNumber][6] += printVariableWithCheckIt(thisIsSecondAccaunt_m, "Комментарий", response, "comment", " Zoiper ")
-  # if response.json()['removed']: results[issueNumber][5] += thisIsSecondAccaunt_m + " | в Наумен даннай УЗ уже уволена!"
-  # if response.json()['removed']: print thisIsSecondAccaunt_m, "\n\t\t\tв Наумен даннай УЗ уже уволена!\n"
   return results
 
 
@@ -506,12 +499,6 @@ try:
     numberFMTN = ""  # номер FMTN или Zoiper
     department = ""  # дамертамент где работал сотрудник
 
-    # print "\n\njira.issue(findedNameIssue) = ", jira.issue(findedNameIssue)
-    # print "\n\njira.issue(findedNameIssue).__dict__ = ", jira.issue(findedNameIssue).__dict__
-    # print "\n\njira.issue(findedNameIssue).__dict__['raw'] = ", jira.issue(findedNameIssue).__dict__['raw']
-    # print "\n\njira.issue(findedNameIssue).__dict__['raw']['fields'] = ", jira.issue(findedNameIssue).__dict__['raw']['fields']
-    # print "\n\njira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624'] = ", jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']
-    # print "\n\njira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']['id'] = ", jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']['id']
       #  Определяется отправленна ли issue в ожидание до даты увольнения
       #   По условиям:
       #     1. что поле 'customfield_19624' вообще заполнено, и
@@ -522,16 +509,10 @@ try:
 
     try:      # сделано через try потому что поля comment нет в изначальном issue
       issueInWaitimg = 0 # эта переменная для выхода из вложенного цикла
-      # print "jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624'] = ", jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']
-      # print "jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']['id']", jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']['id']
-      # print "jira.issue(findedNameIssue).fields.comment.comments = ", jira.issue(findedNameIssue).fields.comment.comments
       if jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624'] != None :
         if jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']['id'] == "43407" \
             or jira.issue(findedNameIssue).__dict__['raw']['fields']['customfield_19624']['id'] == "45405":
           for id in jira.issue(findedNameIssue).fields.comment.comments:
-            # print "id коммента = ", id
-            # print "id.body = ", id.body
-            # print "id.body.find('отложено до 16:00 даты увольнения') = ", id.body.find("отложено до 16:00 даты увольнения")
             if id.body.find("отложено до 16:00 даты увольнения") !=-1 or id.body.find("отложено до 16:00 даты  увольнения") !=-1:
               issueInWaitimg = 1  # помечаем что данная issue отправленна в ожидание до даты увольнения
     except Exception as e:
@@ -542,20 +523,13 @@ try:
     if issueInWaitimg == 1:   # если определено что данная issue отправлена в ожидание до даты увольнения
       print "\t\t" + str(findedNameIssue) + " уже рассматривалаcь, и по результатам отправлена В ожидание. Пропускаем"
       logger.info("\t\t" + str(findedNameIssue) + " уже рассматривалаcь, и по результатам отправлена В ожидание. Пропускаем")
-      # if accountImoprtantInfo.find("Заявка уже отправлена В ожидание до даты увольнения | ") == -1:
-      # results[issueNumber][3] = str("Заявка уже отправлена В ожидание до даты увольнения | " + accountImoprtantInfo)
       continue
 
 
       # для каждой заявки берем ее текст и вытаскиваем из него требуемые данные
-    # print "findedNameIssue = ", findedNameIssue
-    # print "type findedNameIssue = ", type(findedNameIssue)
 
       # рассмотр поля заявки "Описание"
     issues_descriptionText = jira.issue(findedNameIssue).fields.description
-
-    # print "issues_descriptionText = " + str(issues_descriptionText)
-    # print "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"
 
       # если в тексте issue ничего нет, то читаем текст из родительнской заявки (по номеру -2)
               # побовал это сделать, но не получилось.
@@ -564,51 +538,18 @@ try:
                 # разбираться не стал, т.к. это разовая задача
     if issues_descriptionText is None:
 
-        # старое - получение  key родительской issue при условии, что она = -2
-      # numberIssueParent = int((str(findedNameIssue).split("-")[1]).strip()) - 2
-      # findedNameIssueParent = "ACCESS-" + str(numberIssueParent)
-      # IssueParent = "ACCESS-" + str(numberIssueParent)
-        # КОНЕЦ старое - получение  key родительской issue при условии, что она = -2
       IssueParent = jira.issue(findedNameIssue).__dict__["raw"]["fields"]['issuelinks'][0]['outwardIssue']['key']  # получение key родительской issue
-      # print "findedNameIssueParent = " + findedNameIssueParent
-      # jql_OneIssue = ('issue = "ACCESS-433"')  # только заявки по которым требуется работа
-      # issues_list_OneIssue = jira.search_issues(jql_OneIssue)
-      # IssueParent = jira.issue("ACCESS-619")
-      # print "IssueParent4 = ", IssueParent
-      # IssueParent = jira.issue(findedNameIssueParent)
-      # print "IssueParent3 = ", IssueParent
-      # IssueParent = jira.issue("ACCESS-433")
-      # print "IssueParent2 = ", IssueParent
-      # IssueParent = jira.issue(findedNameIssueParent)
-      # print "IssueParent = ", IssueParent
-      # print "type IssueParent = ", type(IssueParent)
       print "\n\t\t--------\tздесь пусто. Рассматриваем родительскую заявку " + str(IssueParent)  # номер родительской заявки#
       logger.info("\n\t\t--------\tздесь пусто. Рассматриваем родительскую заявку " + str(IssueParent))  # номер родительской заявки#
       accountImoprtantInfo += " Saw in parent issue " + str(IssueParent) + " with name "
-      # try:
-      # print "\t\t\tjira.issue(findedNameIssueParent).fiIssueParentelds.description = " + str(jira.issue(findedNameIssueParent).fields.description)
       issues_descriptionText = jira.issue(IssueParent).fields.description
       if issues_descriptionText is None: issues_descriptionText += "empty in issues_descriptionText"
-      # print "\t\t\tjira.issue(findedNameIssueParent).fields.description = " + str(jira.issue(findedNameIssueParent).fields.description)
-      # issues_descriptionText = "empty in issues_descriptionText."
       if issues_descriptionText.find("empty in issues_descriptionText") != -1 : print "issues_descriptionText = ", issues_descriptionText
-      # except Exception as e:
-      #   print "!!!!!Error!   issues_descriptionText = ", issues_descriptionText
-      #   logger.info("!!!!!Error!   issues_descriptionText = " + str(issues_descriptionText))
-      #   print '\n\tThis is error: ', str(sys.exc_info())
-      #   issues_descriptionText = " empty in issues_descriptionText "
-      #   print "issues_descriptionText = ", issues_descriptionText
-
 
 
 
     words_issues_descriptionText = issues_descriptionText.rsplit()
-    # print words_issues_descriptionText
-    # print "\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"
     for word in words_issues_descriptionText:
-
-      # print "word = ", word
-
 
         # определение не прописано ли в тексте, что увольнение отменяется
       if word.lower() == "увольнение":
@@ -674,7 +615,6 @@ try:
         nameDismiss = words_issues_descriptionText[indexWord+1]
         print "\t\t\tшаг 1 nameDismiss = ", nameDismiss
         indexWord_next = indexWord + 2
-        # print "words_issues_descriptionText[indexWord_next] при indexWord_next = ", indexWord_next, " получаем ", words_issues_descriptionText[indexWord_next]
         while words_issues_descriptionText[indexWord_next] != "занимающий":
           nameDismiss = nameDismiss + " " + words_issues_descriptionText[indexWord_next]
           indexWord_next += 1
@@ -703,14 +643,9 @@ try:
 
 
         # оперделение УЗ увольняющегося
-      # accountImoprtantInfo = "" # это следующий блок; но возможно уже здесь они будут заполняться
       if word == "Учетная":
         indexWord = words_issues_descriptionText.index(word)
         print "\t\tзапущено определение Учетки - indexWord = ", indexWord
-        # print "Определение аккаунта - indexWord = ", indexWord
-        # print "words_issues_descriptionText[indexWord+1] = ", words_issues_descriptionText[indexWord+1]
-        # print "words_issues_descriptionText[indexWord+2] = ", words_issues_descriptionText[indexWord+2]
-        # print "words_issues_descriptionText[indexWord+3] = ", words_issues_descriptionText[indexWord+3]
         if words_issues_descriptionText[indexWord+1] == "запись" and words_issues_descriptionText[indexWord+2] == "сотрудника:":
           accountDismiss = words_issues_descriptionText[indexWord+3]
 
@@ -734,7 +669,6 @@ try:
 
       # проверка есть ли родительская заявка
     checkIfThereIsParentIssue = jira.issue(findedNameIssue).__dict__["raw"]["fields"]['issuelinks']
-    # print "checkIfThereIsParentIssue = ", checkIfThereIsParentIssue
     if checkIfThereIsParentIssue != []:
       IssueParent_name = jira.issue(findedNameIssue).__dict__["raw"]["fields"]['issuelinks'][0]['outwardIssue']['fields']['summary']  # получение имени  родительской issue
       # print "\t\t\tIssueParent_name = ", IssueParent_name
@@ -750,10 +684,6 @@ try:
         accountImoprtantInfo += " !!! ТЕХНИЧЕСКОЕ увольнение !!! "    # на УЗ ОТМЕНА УВОЛЬНЕНИЯ
 
       # оперделение что это ОТМЕНА УВОЛЬНЕНИЯ
-    # print "str(IssueParent_name).lower().find(отмена увольнения) = ", IssueParent_name.lower().find("отмена увольнения")
-    # print "str(IssueParent_name).lower().find(увольнение отменено) = ", IssueParent_name.lower().find("увольнение отменено")
-    # print "str(Issue_name).lower().find(отмена увольнения) = ", Issue_name.lower().find("отмена увольнения")
-    # print "str(Issue_name).lower().find(увольнение отменено) = ", Issue_name.lower().find("увольнение отмененоя")
     if IssueParent_name.lower().find("отмена увольнения") != -1 or IssueParent_name.lower().find("увольнение отменено") != -1 or Issue_name.lower().find("отмена увольнения") != -1 or Issue_name.lower().find("увольнение отменено") != -1:
       if accountImoprtantInfo.find("!!! ОТМЕНА УВОЛЬНЕНИЯ !!!") == -1:
         print "\t\tнайдено Отм увольнения! в одном из заголовков"
@@ -769,13 +699,10 @@ try:
 
      # сохранение полученных результатов
     jira_data = [dataDismiss, str(nameDismiss), str(accountDismiss), str(accountImoprtantInfo), str(telephoneNumberDismiss), str(nccGrAll_Dismiss), str(numberFMTN), str(department)]
-    # print "\t\tjira_data = ", jira_data
     results.update({str(findedNameIssue):jira_data})
-    # print "\t\tjira_result = ", results
 
       # вывод в лог данных по Issue
     logIssueInfo (str(findedNameIssue), results[str(findedNameIssue)])
-    # break
 
 
 
@@ -812,7 +739,6 @@ ________________________________________________________________________________
 
 
 
-# sys.exit()
 
 """
   Получение из LDAP данных по уволенным пользователям
@@ -852,8 +778,6 @@ try:
       logIssueInfo(str(issueNumber), results[str(issueNumber)])    # вывод в лог данных по Issue
       continue
 
-    # ldapfilter = '(&(objectClass=person)(memberOf: CN=NCC_IT,OU=NCC,OU=Service Users,DC=SD,DC=LOCAL)'  # просмотр пользователей группы NCC_IT
-    # ldapfilter = '(&(objectClass=person)(cn=Беляков Сергей Евгеньевич))'  # показывает данные конкретному пользователю
     findingUserPrincipalName = searchInAD[1][2]+"@SD.LOCAL"
     print "\tfindingUserPrincipalName = ", findingUserPrincipalName
     ldapfilter = '(&(objectClass=person)(userPrincipalName=%s))'  # показывает данные по конкретному пользователю
@@ -895,33 +819,18 @@ try:
        # определяем что RIP или прописяваем отдел --------->
       if str(userData_fromLDAP).find(',OU=R.I.P,') != -1:
         accountImoprtantInfo += " Аккаунт в папке R.I.P ! "
-      # else:
-      # import chardet
       for q in str(userData_fromLDAP).split(","):
         if q[:3] == "OU=":
-          # result = chardet.detect(q)
-          # print("коддировка = ", result)
-          # q = q.replace("\\","")
           department = q[3:] + "\\" + department
         elif q == "DC=SD": break
-        # if q[:3] == "OU=": ou.insert(0, q[3:])
-      # print "q after END = ", q#
-      # print "accountImoprtantInfo = ", accountImoprtantInfo#
       print "\taccountImoprtantInfo = ", accountImoprtantInfo#
         # убираем лишнюю запись "R.I.P\"
       if department.find("R.I.P") != -1:
         department = ""
       else:
         print "\tdepartment = ", department
-
-
-      # print "department = ", department.decode('windows-1251')
-      # print "ou_2 = ", ou
-      # department += ou#
-      # print "department = ", department#
-      # accountImoprtantInfo += str("отдел" + ou)#
-      # print "accountImoprtantInfo with отдел = ", accountImoprtantInfo#
       # # <--------- конец определяем что RIP или прописяваем отдел
+      
       memberOfList_NCC = []
       for memberOf in userData_fromLDAP['memberOf']:
         if (memberOf.startswith("NCC_", 3, 7)):
@@ -936,9 +845,7 @@ try:
         # logger.info("\tUser " + accountDismiss + " registered in AD as an agent of groups NCC_ : ")
         for nccGr in memberOfList_NCC:
           print '\t\t', nccGr
-          # print '\t\t', (nccGr.split(",")[0])[3:]
           nccGrAll_Dismiss += (nccGr.split(",")[0])[3:] + " "
-        #   logger.info( '\t\t' + nccGr)
 
       telephoneNumberDismiss = userData_fromLDAP['telephoneNumber'] # номер телефона увлльняющегося
       if len(telephoneNumberDismiss) == 0: telephoneNumberDismiss = ""
@@ -1026,10 +933,6 @@ try:
 
       thisIsSecondAccaunt_m = ""   # вывод данных по основному User
       printDataFromNaumenCC(issueNumber, results, response, thisIsSecondAccaunt_m)     # вывод на экран прочитанных данных; и там же новая инфо дописывается к имеющимся данным
-      # dataDismiss = datetime.strptime(dataDismiss, '%Y-%m-%d').date()
-      # print "\t\tДата увольнения\t", dataDismiss
-      #
-      # if dataDismiss < nowData: print "\t\t\tСегодня уже ", nowData, ". Значит пора удалять эту запись из НауменКЦ"
 
 
 
@@ -1053,10 +956,6 @@ try:
       printDataFromNaumenCC(issueNumber, results, response, thisIsSecondAccaunt_m)     # вывод на экран прочитанных данных; и там же новая инфо дописывается к имеющимся данным
 
 
-    # response = toNauenCC_search_User(accountDismiss)
-    # allUserData = response.json().decode('UTF-8').encode('utf-8')
-    # titleUser = response.json()['title'].encode('utf-8')
-
       # вывод в лог данных по Issue
     logIssueInfo (str(issueNumber), results[str(issueNumber)])
 
@@ -1069,7 +968,6 @@ except Exception as e:
   logger.error('\n\n\t\tNaumenCC import - This is error: ' + str(sys.exc_info()))
   sys.exit()
 
-# finally:
 
 print "\n---------------------------------------\n\tОбработка данных КЦ Наумен завершена\n---------------------------------------\n\n\n"
 logger.info(
@@ -1103,14 +1001,7 @@ authorizationIPO()
 ipoAvaya_usersDatatensionsData = sessionGet("users")
 
 logger.info("________ по Users получено response _______\n\t\t" + str(ipoAvaya_usersDatatensionsData))
-# logger.info("________ по Users получено text _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.text))
-# logger.info("________ по Users получено json _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.json()))
-# logger.info("________ по Users получено response.status_code _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.status_code))
-# logger.info("________ по Users получено response.cookies _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.content))
-# logger.info("________ по Users получено response.history _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.history))
-# logger.info("________ по Users получено response.headers _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.headers))
 logger.info("________ по Users получено response.elapsed _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.elapsed))
-# logger.info("________ по Users получено response.content _______\n\t\t" + str(ipoAvaya_usersDatatensionsData.content))
 
 textUsersFromAvaya_API = ipoAvaya_usersDatatensionsData.content  # полученные данные по Users!!!
 
@@ -1118,14 +1009,7 @@ textUsersFromAvaya_API = ipoAvaya_usersDatatensionsData.content  # получе�
 ipoAvaya_extensionsData = sessionGet("extensions")
 
 logger.info("________ about Extensions received response _______\n\t\t" + str(ipoAvaya_extensionsData))
-# logger.info("________ about Extensions received text _______\n\t\t" + str(ipoAvaya_extensionsData.text))
-# logger.info("________ about Extensions received json _______\n\t\t" + str(ipoAvaya_extensionsData.json()))
-# logger.info("________ about Extensions received response.status_code _______\n\t\t" + str(ipoAvaya_extensionsData.status_code))
-# logger.info("________ about Extensions received response.cookies _______\n\t\t" + str(ipoAvaya_extensionsData.cookies))
-# logger.info("________ about Extensions received response.history _______\n\t\t" + str(ipoAvaya_extensionsData.history))
-# logger.info("________ about Extensions received response.headers _______\n\t\t" + str(ipoAvaya_extensionsData.headers))
 logger.info("________ about Extensions received response.elapsed _______\n\t\t" + str(ipoAvaya_extensionsData.elapsed))
-# logger.info("________ about Extensions received response.content _______\n\t\t" + str(ipoAvaya_extensionsData.content))
 
 textExtensionsFromAvaya_API = ipoAvaya_extensionsData.content  # полученные данные по Extensions
 
@@ -1174,9 +1058,9 @@ finally:
 #   file2.close()
 # ________________________________ конец  чтение данных и файлов
 #
-#       # ------------------------------------------------
-#       ### <---------- КОНЕЦ работа с файлом
-#       # ------------------------------------------------
+      # ------------------------------------------------
+      ### <---------- КОНЕЦ работа с файлом
+      # ------------------------------------------------
 
 
           ###############################################
@@ -1196,7 +1080,6 @@ dictExtensionsFromAvayaIPO_API = {}  # определяем dict чтобы не
             # ---------------------------------------
 
 exec ('dictUsersFromAvayaIPO_API = ' + textUsersFromAvaya_API)
-# print " type(dictUsersFromAvayaIPO_API) = ", type(dictUsersFromAvayaIPO_API)
 logger.info("--- received dictUsersFromAvayaIPO_API ___________________________________________\n\t")
 print ("--- received dictUsersFromAvayaIPO_API _____")
 
@@ -1209,15 +1092,10 @@ for dataUser in dictUsersFromAvayaIPO_API["response"]["data"]["ws_object"]:
   extension = "-zero-"
   fullName = "-zero-"
   name = "-zero-"
-  # print ("--- received dataUser in textUsersFromAvaya_API ___________")
   giud = str(dataUser['User']['@GUID'])
-  # print "\t\t\tgiud = " + giud
   extension = str(dataUser['User']['Extension'])
-  # print "\t\t\textension = " + extension
   fullName = str(dataUser['User']['FullName'])
-  # print "\t\t\tfullName = " + fullName
   name = str(dataUser['User']['Name'])
-  # print "\t\t\tname = " + name
 
   # сохранение полученных результатов в словаре dataFromAvaya, где за ключ берется extension
   dataFromAvayaUsers.update({extension: [giud, extension, fullName, name]})
@@ -1237,14 +1115,11 @@ for dataUser in dictUsersFromAvayaIPO_API["response"]["data"]["ws_object"]:
             # ---------------------------------------
 
 logger.info("\n--- received textExtensionsFromAvaya_API ___________________________________________")
-# logger.info("\n--- received textExtensionsFromAvaya_API ___________________________________________\n\t" + str(textExtensionsFromAvaya_API))
-# print ("\n--- received textExtensionsFromAvaya_API _____")
 
 
 exec ('dictExtensionsFromAvayaIPO_API = ' + textExtensionsFromAvaya_API)
 logger.info("\n--- received dictExtensionsFromAvayaIPO_API ___________________________________________\n\t" + str(
   dictExtensionsFromAvayaIPO_API))
-# print ("--- received dictExtensionsFromAvayaIPO_API _____")
 
 # захват первого-отдельного описанного в dictExtensionsFromAvayaIPO_API значения Extansion
 dataFromAvayaExtensions.update({str(dictExtensionsFromAvayaIPO_API["response"]["data"]["ws_object"]["Extension"][1]):
@@ -1255,12 +1130,8 @@ dataFromAvayaExtensions.update({str(dictExtensionsFromAvayaIPO_API["response"]["
 
 # парсинг остальных описанных в dictExtensionsFromAvayaIPO_API значений Extansions
 for dataExtension in dictExtensionsFromAvayaIPO_API["ws_object"]:
-  # logger.info("--- получено dataExtension from Смирнова ___________________________________________\n\t"+ str(dataExtension))
-  # print ("--- received dataExtension from textExtensionsFromAvaya_API ___________________________________________")
   extension = str(dataExtension['Extension'][1])
-  # print "\t\t\textension = " + extension
   guid = str(dataExtension['Extension'][0]['@GUID'])
-  # print "\t\t\tguid = " + guid
 
   # сохранение полученных результатов в словаре dataFromAvaya, где за ключ берется extension
   dataFromAvayaExtensions.update({extension: [guid, extension]})
@@ -1306,7 +1177,6 @@ for issueJira_data in results.items():
 
     # из учетки  пользователя берется его фамилия (в латинице)
   findUserLatinSurnameFromData = str(accountDismiss).split(".")       # из учетки пользовтеля вырезается фамилия
-  # print "findUserLatinSurnameFromData = ", findUserLatinSurnameFromData
     # если в учетке пользователя есть разделение инициялы.фамилия знаком "."
   if len(findUserLatinSurnameFromData)>=2:
         # если получили "нестандартное" имя учетки, типа Sedyakina.YS (т.е. первая - фамилия, далее инициалы)
@@ -1317,9 +1187,6 @@ for issueJira_data in results.items():
   else:  # а если в учетке пользователя отсутствует знак "."
     findUserLatinSurnameFromData = (findUserLatinSurnameFromData[0]).strip().decode('utf-8').lower()
 
-  #   # создаем list из значений, которые ищем.
-  # whatFind = [findPhoneNumberInUsersIPO, findUserSurnameInUsersIPO, findUserNameInUsersIPO, findUserLatinSurnameFromData]
-  # print "whatFind = ", whatFind
 
   print ("\t_________________________________рассматривается:")
 
@@ -1353,7 +1220,6 @@ for issueJira_data in results.items():
 
         #-----------------------------------------
         # если совпали extension, фамилия, и имя
-                                # сколько раз "(не)попало"  + 4 -0
         # -----------------------------------------
       if findPhoneNumberFromData == ext \
             and (str(dataFromAvayaUsers[ext][2]).decode('utf-8').lower()).find(findUserSurnameFromData) != -1 \
@@ -1431,36 +1297,6 @@ for issueJira_data in results.items():
         logger.info("\t\t\t\t " + message + " Extension " + ext)
         telephoneNumberDismiss += message
 
-      #   #-------------------------------------------------------
-      #   # если в FullName есть фамилия и в Name есть имя учетки
-      #     # похоже лучше удалить
-      #   #-------------------------------------------------------
-      # elif (str(dataFromAvayaUsers[ext][2]).decode('utf-8').lower()).find(findUserSurnameFromData) != -1 \
-      #       and (str(dataFromAvayaUsers[ext][3]).decode('utf-8').lower()).find(findUserLatinSurnameFromData) != -1:
-      #   print "\t\tExtension =  ", ext
-      #   print "\t\tfstr(dataFromAvayaUsers[ext][2]).decode('utf-8').lower() =  ", str(
-      #     dataFromAvayaUsers[ext][2]).decode('utf-8').lower()
-      #   print "\t\tfstr(dataFromAvayaUsers[ext][3]).decode('utf-8').lower() =  ", str(
-      #     dataFromAvayaUsers[ext][3]).decode('utf-8').lower()
-      #   message = "User найден в IPO (по фамилии + учетка). Надо проверить в AD, - рассмотреть его к удалению из IPO Avaya. ( " + ext + " ) "
-      #   print ("\t\t\t\t " + message + " Extension " + ext)
-      #   logger.info("\t\t\t\t " + message + " Extension " + ext)
-      #   accountImoprtantInfo = message + " | " + accountImoprtantInfo
-
-        #--------------------------------
-        # если в Name есть имя учетки
-                              # сколько раз "(не)попало"  + 0 -14
-        #     # похоже лучше удалить
-        #--------------------------------
-      # elif findUserLatinSurnameFromData != "" \
-      #     and (str(dataFromAvayaUsers[ext][3]).decode('utf-8').lower()).find(findUserLatinSurnameFromData) != -1:
-      #   print "\t\tExtension =  ", ext
-      #   print "\t\tfstr(dataFromAvayaUsers[ext][2]).decode('utf-8').lower() =  ", str(dataFromAvayaUsers[ext][2]).decode('utf-8').lower()
-      #   print "\t\tfstr(dataFromAvayaUsers[ext][3]).decode('utf-8').lower() =  ", str(dataFromAvayaUsers[ext][3]).decode('utf-8').lower()
-      #   message = "User найден в IPO (по учетке). Надо проверить в AD, - рассмотреть его к удалению из IPO Avaya. ( " + ext + " ) "
-      #   print ("\t\t\t\t " + message + " Extension " + ext)
-      #   logger.info("\t\t\t\t " + message + " Extension " + ext)
-      #   accountImoprtantInfo = message + " | " + accountImoprtantInfo
 
         #---------------------------------------
         # если в FullName есть и имя и фамилия
@@ -1590,16 +1426,9 @@ try:
       print "\t\tFrom Avaya IPO deleting user with number", telephoneNumberDismiss
       logger.info("\t\tFrom Avaya IPO deleting user with number " + telephoneNumberDismiss)
       accountImoprtantInfo = "From Avaya IPO deleting user with number " + telephoneNumberDismiss + " | " + accountImoprtantInfo
-      # accountImoprtantInfo += "TEST (не выполнено) - From Avaya IPO deleting user with number " + telephoneNumberDismiss
       print "\t\tGUID = " + dataFromAvayaUsers[telephoneNumberDismiss][0]
       deleteUser = sessionDelete("users", dataFromAvayaUsers[telephoneNumberDismiss][0]) # удаление User
-      # logger.info("\ttext delete User JSON:\n\t\t\t" + str(deleteUser.text))
       logger.info("\t\tabout delete User JSON:\n\t\t\t" + str(deleteUser.json()))
-      # logger.info("\tabout delete User status_code:\n\t\t\t" + str(deleteUser.status_code))
-      # logger.info("\tabout delete User content:\n\t\t\t" + str(deleteUser.content))
-      # logger.info("\tabout delete User cookies:\n\t\t\t" + str(deleteUser.cookies))
-      # logger.info("\tabout delete User history:\n\t\t\t" + str(deleteUser.history))
-      # logger.info("\tabout delete User :\n\t\t\t" + str(deleteUser.headers))
       logger.info("\t\tabout delete User   elapsed:\n\t\t\t" + str(deleteUser.elapsed))
 
           # --------------------
@@ -1608,16 +1437,9 @@ try:
       print "\t\tFrom Avaya IPO deleting extension ", telephoneNumberDismiss
       logger.info("\t\tFrom Avaya IPO deleting extension " + telephoneNumberDismiss)
       accountImoprtantInfo = "From Avaya IPO deleting extension " + telephoneNumberDismiss + " | " + accountImoprtantInfo
-      # accountImoprtantInfo += "TEST (не выполнено) - From Avaya IPO deleting extension " + telephoneNumberDismiss
       print "\t\tGUID = " + dataFromAvayaExtensions[telephoneNumberDismiss][0]
       deleteExtension = sessionDelete("extensions", dataFromAvayaExtensions[telephoneNumberDismiss][0])
-      # logger.info("\ttext delete Extension JSON:\n\t\t\t" + str(deleteExtension.text))
       logger.info("\t\tabout delete Extension JSON:\n\t\t\t" + str(deleteExtension.json()))
-      # logger.info("\tabout delete Extension status_code:\n\t\t\t" + str(deleteExtension.status_code))
-      # logger.info("\tabout delete Extension content:\n\t\t\t" + str(deleteExtension.content))
-      # logger.info("\tabout delete Extension cookies:\n\t\t\t" + str(deleteExtension.cookies))
-      # logger.info("\tabout delete Extension history:\n\t\t\t" + str(deleteExtension.history))
-      # logger.info("\tabout delete Extension :\n\t\t\t" + str(deleteExtension.headers))
       logger.info("\t\tabout delete Extension elapsed:\n\t\t\t" + str(deleteExtension.elapsed))
 
       # --------------------------------
@@ -1646,7 +1468,6 @@ try:
       print ("\t\tNow this accaunt must delete from Naumen CC")
       logger.info("\t\tNow this accaunt must delete from Naumen CC")
       resultRemoveUserFormNaumen = remove_user_request(accountDismiss)   # раскомментировать  по окончании тестирования
-      # resultRemoveUserFormNaumen = "TEST (не выполнено) - В системе Наумен удалена учетка"   # проверено 1 раз
       print ("\t\t" + resultRemoveUserFormNaumen)
       logger.info("\t\t" + resultRemoveUserFormNaumen)
       accountImoprtantInfo += " " + resultRemoveUserFormNaumen
@@ -1670,7 +1491,6 @@ except Exception as e:
   logger.error('\n\n\t\tError when changing NaumenCC or Avaya IPO: ' + str(sys.exc_info()))
   sys.exit()
 
-# finally:
 
 print "\n---------------------------------------\n\tВнесение изменений в системы Наумен и Avaya IPO завершена\n---------------------------------------\n\n\n"
 logger.info(
@@ -1723,8 +1543,6 @@ try:
     printInfoAboutIssue(issueJira_data, issueNumber, dataDismiss, nameDismiss, accountDismiss, accountImoprtantInfo,
                         telephoneNumberDismiss, nccGrAll_Dismiss, numberFMTN, department)
 
-    # logger.info('\t-------------------------------------------------------------------\n\t' + issueNumber + "\t\t\t" + dataDismiss + "\t" + nameDismiss + "\t" + accountDismiss)
-
 
       # запрос в Jira определенной issue
     changingIssue = jira.issue(issueNumber)
@@ -1759,13 +1577,6 @@ try:
 
       # если задача в статусе "В ожидании" (код 10103)
     if changingIssue_status == "10103":
-      #   # если заявка уже отправелена "В ожидание" до даты увольнения, - то пропускаем ее
-      # print "\n\t\t\tjira.issue(changingIssue).fields.customfield_19624.id = ", jira.issue(changingIssue).fields.customfield_19624.id
-      # if jira.issue(changingIssue).fields.customfield_19624.id == "45405":
-      #   print "\n\t\t\tЗаявка уже отправлена В ожидание до даты увольнения "
-      #   logger.info(" Заявка уже отправлена В ожидание до даты увольнения")
-      #   if accountImoprtantInfo.find("Заявка уже отправлена В ожидание до даты увольнения | ") == -1: results[issueNumber][3] = str("Заявка уже отправлена В ожидание до даты увольнения | " + accountImoprtantInfo)
-      #   continue
         # если не назначен исполнитель, выполняем "Назначить на меня"
       print "\n\t\t\tjira.issue(changingIssue).fields.assignee = ", jira.issue(changingIssue).fields.assignee
       if jira.issue(changingIssue).fields.assignee is None or str(jira.issue(changingIssue).fields.assignee) == "":
@@ -1774,11 +1585,9 @@ try:
         # выполняется "Вернуть в работу" (меняется статус на "Зарегистрирована")
       print "\t\t\tchangingIssue_status2 = ", jira.issue(changingIssue).fields.status
       jira.transition_issue(changingIssue, transition='71')
-      # time.sleep(3)
         # выполняется "В работу" (меняется статус на "В работе")
       print "\t\t\tchangingIssue_status3 = ", jira.issue(changingIssue).fields.status
       jira.transition_issue(changingIssue, transition='21')
-      # time.sleep(3)
       print "\t\t\tchangingIssue_status4 = ", jira.issue(changingIssue).fields.status
 
       # если задача в статусе "Первичная обработка" (код 10713)
@@ -1799,7 +1608,6 @@ try:
         jira.transition_issue(changingIssue, transition='171')
         # выполняется "В работу" (меняется статус на "В работе")
       jira.transition_issue(changingIssue, transition='21')
-      # time.sleep(3)
       print "\t\t\tchangingIssue_status4 = ", jira.issue(changingIssue).fields.status
 
 
@@ -1811,7 +1619,6 @@ try:
     if accountImoprtantInfo.find("Еще рано обрабатывать данную Issue. Она получает статус В ожидании | ") != -1:
       print "\t\t\t Еще рано обрабатывать данную Issue. Она получает статус В ожидании"
       logger.info(" Еще рано обрабатывать данную Issue. Она получает статус В ожидании")
-      # commentIssue = 'отложено до 16:00 даты увольнения \n' + telephoneNumberDismiss + "\n" + accountImoprtantInfo + "\n" +  nccGrAll_Dismiss + "\n" + numberFMTN + "\n" + department
       commentIssue = 'отложено до 16:00 даты увольнения \n' + telephoneNumberDismiss + "\n" +  nccGrAll_Dismiss + "\n" + numberFMTN + "\n" + department
       executionTime = "9m"    # определяем  потреченного времени
       returnTime = str(dataDismiss) + 'T15:51:33.000+0300'   # определяем дату и время выхода issue из режима ожиданния
@@ -1832,7 +1639,6 @@ try:
       commentIssue = 'указано ОТМЕНА УВОЛЬНЕНИЯ. Изменения не вносились.'
       executionTime = "9m"
       accountImoprtantInfo = "Заявка закрыта без изменений " + accountImoprtantInfo
-      # print " операция по ОТМЕНА УВОЛЬНЕНИЯ активировано "
 
       # обработка issue , которые !!! ТЕХНИЧЕСКОЕ увольнение !!!
       #------------------------------------------------------
@@ -1843,7 +1649,6 @@ try:
       commentIssue = 'указано ТЕХНИЧЕСКОЕ УВОЛЬНЕНИЕ. Изменения не вносились'
       executionTime = "9m"
       accountImoprtantInfo = "Заявка закрыта без изменений " + accountImoprtantInfo
-      # print " операция по ТЕХНИЧЕСКОЕ увольнение активировано "
 
       # обработка issue , которые "Пользователь в системах телефонии не найден"
       # ------------------------------------------------------
@@ -1854,7 +1659,6 @@ try:
       commentIssue = 'не найден телефонный номер, закрепленный за указанным пользователем.\nПо телефонии изменений не вносилось.'
       executionTime = "9m"
       accountImoprtantInfo = "Заявка закрыта без изменений " + accountImoprtantInfo
-      # print " операция Решение по Пользователь в системах телефонии не найден активировано "
 
       # обработка issue , которые "From Avaya IPO deleting user with number"
       # ------------------------------------------------------
@@ -1864,9 +1668,6 @@ try:
       changingIssue_decision_YN = 1  # определяет требуется ли Решение в issue  (ставим 1 = да)
       commentIssue = 'удален User с внутренним номером ' + str(telephoneNumberDismiss) +', закрепленный за указанным пользователем'
       executionTime = "9m"
-      # accountImoprtantInfo = "Удален User с внутренним номером " + accountImoprtantInfo
-      # print " операция Решение по From Avaya IPO deleting user with numberн активировано "
-
       # обработка issue , которые "From Avaya IPO deleting extension"
       # ------------------------------------------------------
     if accountImoprtantInfo.find("From Avaya IPO deleting extension") != -1:
@@ -1875,8 +1676,6 @@ try:
       changingIssue_decision_YN = 1  # определяет требуется ли Решение в issue  (ставим 1 = да)
       commentIssue = 'удален внутренний номер ' + str(telephoneNumberDismiss) +', закрепленный за указанным пользователем'
       executionTime = "9m"
-      # accountImoprtantInfo = "Удален внутренний номер " + telephoneNumberDismiss + " | " + accountImoprtantInfo
-      # print " операция Решение по From Avaya IPO deleting extension активировано "
 
       # обработка issue , которые "Учетка удалилена в Naumen"
       # ------------------------------------------------------
@@ -1892,7 +1691,6 @@ try:
         accountImoprtantInfo = "Не забыть вручную удалить данные по FMTN (номер в проекте и на сайте https://fmtn.beeline.ru/) ! | " + accountImoprtantInfo
       elif numberFMTN.find("Zoiper") != -1:
         accountImoprtantInfo = "Не забыть вручную удалить данные по Zoiper (номер в проекте и на сайте https://fmc.beeline.ru/) ! | " + accountImoprtantInfo
-      # print " операция Решение по Учетка удалилена в Naume активировано "
 
 
 
@@ -1901,34 +1699,9 @@ try:
     if changingIssue_decision_YN == 1:
       print "\t\t\tРешнеие задачи активируется с commentIssue = ' ", commentIssue, " '"
       logger.info("Решнеие задачи активируется с commentIssue = ' " + commentIssue + " '")
-      jira.add_comment(changingIssue, commentIssue)    # оставляется коммент  (т.к. не срабатывает при transition_issue...)
-      # jira.transition_issue(changingIssue, transition = "31", comment = commentIssue, fields={'resolution ':{'id': '3'}})
-      # jira.transition_issue(changingIssue, transition = "31", fields={'customfield_19626':'46800'})
-      # jira.transition_issue(changingIssue, transition = "31", comment = commentIssue, worklog="16m", fields={'customfield_19626':{'id':'46800'}})
+      jira.add_comment(changingIssue, commentIssue)    # оставляется коммент  (т.к. не срабатывает при transition_issue...)46800'}})
       jira.transition_issue(changingIssue, transition = "31", worklog=executionTime, fields={'customfield_19626':{'id':'46800'}})  # меняется статус issue на "Решение" - "Решено" с укаханием потреченного времени (executionTime)
-      # jira.transition_issue(changingIssue, transition = "31", comment = commentIssue, fields={'customfield_19626':{'id':'46800'}})
-      # jira.add_worklog(changingIssue, timeSpent="16m")
-      # results[issueNumber][3] = commentIssue + results[issueNumber][3]
-      # print "Решнеие задачи активировано"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
     # jira.close()
 
 
@@ -1994,23 +1767,12 @@ except Exception as e:
   logger.error('\n\n\t\tEndData import - This is error: ' + str(sys.exc_info()))
   sys.exit()
 
-finally:
-
-
-
 
 
  """
   КОНЕЦ
    Вывод итоговых данных
 _____________________________________________________________________________________________________________________________________________________"""
-
-
-
-
-
-
-
 
 
 
